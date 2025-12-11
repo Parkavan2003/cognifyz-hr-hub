@@ -127,11 +127,11 @@
 
 @layer utilities {
   .glass-card {
-    @apply bg-muted/60 backdrop-blur-xl border border-border/50 shadow-lg shadow-primary/5;
+    @apply bg-card backdrop-blur-xl border border-border/50 shadow-lg shadow-primary/5;
   }
 
   .glass-card-strong {
-    @apply bg-muted/70 backdrop-blur-2xl border border-border/40 shadow-xl shadow-primary/10;
+    @apply bg-card backdrop-blur-2xl border border-border/40 shadow-xl shadow-primary/10;
   }
 
   .glass-sidebar {
