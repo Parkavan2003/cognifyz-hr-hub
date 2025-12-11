@@ -43,6 +43,7 @@ export default function Dashboard() {
   const unreadMessages = myMessages.filter(m => !m.read).length;
 
   const isManager = canAssign();
+  const isFounder = user.role === 'Founder / Director';
   const teamSize = visibleEmployees.length - 1;
 
   const stats = [
@@ -142,13 +143,14 @@ export default function Dashboard() {
             attendanceData={{ present: attendanceStats.present, absent: attendanceStats.absent, percentage: attendanceStats.presentPercentage }}
             teamSize={teamSize}
             isManager={isManager}
+            isFounder={isFounder}
           />
         )}
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* My Profile Card */}
-          <Card className="glass-card card-hover lg:col-span-1">
+          <Card className={cn("glass-card card-hover", isFounder ? "lg:col-span-3" : "lg:col-span-1")}>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                 <User className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
@@ -186,66 +188,68 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Task Summary */}
-          <Card className="glass-card card-hover lg:col-span-2">
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <div>
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                  <ListTodo className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                  My Tasks
-                </CardTitle>
-                <CardDescription className="text-xs sm:text-sm">Your current task status</CardDescription>
-              </div>
-              <Link to="/tasks">
-                <Button variant="outline" size="sm" className="text-xs sm:text-sm">View All</Button>
-              </Link>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
-                <div className="text-center p-3 sm:p-4 rounded-xl bg-warning/10 glass-card">
-                  <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-warning mx-auto mb-1.5 sm:mb-2" />
-                  <p className="text-lg sm:text-2xl font-bold text-foreground">{pendingTasks}</p>
-                  <p className="text-[10px] sm:text-sm text-muted-foreground">Pending</p>
+          {/* Task Summary - Hidden for Founder */}
+          {!isFounder && (
+            <Card className="glass-card card-hover lg:col-span-2">
+              <CardHeader className="flex flex-row items-center justify-between pb-3">
+                <div>
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <ListTodo className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                    My Tasks
+                  </CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">Your current task status</CardDescription>
                 </div>
-                <div className="text-center p-3 sm:p-4 rounded-xl bg-info/10 glass-card">
-                  <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-info mx-auto mb-1.5 sm:mb-2" />
-                  <p className="text-lg sm:text-2xl font-bold text-foreground">{inProgressTasks}</p>
-                  <p className="text-[10px] sm:text-sm text-muted-foreground">In Progress</p>
-                </div>
-                <div className="text-center p-3 sm:p-4 rounded-xl bg-success/10 glass-card">
-                  <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-success mx-auto mb-1.5 sm:mb-2" />
-                  <p className="text-lg sm:text-2xl font-bold text-foreground">{completedTasks}</p>
-                  <p className="text-[10px] sm:text-sm text-muted-foreground">Completed</p>
-                </div>
-              </div>
-
-              {/* Recent Tasks */}
-              <div className="space-y-2 sm:space-y-3">
-                {myTasks.slice(0, 3).map((task) => (
-                  <div
-                    key={task.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 sm:p-3 rounded-lg bg-muted/30 glass-card gap-2"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-foreground text-sm truncate">{task.title}</p>
-                      <p className="text-xs text-muted-foreground">Due: {task.dueDate}</p>
-                    </div>
-                    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                      <Badge className={cn('text-[10px] sm:text-xs', getPriorityColor(task.priority))}>
-                        {task.priority}
-                      </Badge>
-                      <Badge className={cn('text-[10px] sm:text-xs', getStatusColor(task.status))}>
-                        {task.status}
-                      </Badge>
-                    </div>
+                <Link to="/tasks">
+                  <Button variant="outline" size="sm" className="text-xs sm:text-sm">View All</Button>
+                </Link>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
+                  <div className="text-center p-3 sm:p-4 rounded-xl bg-warning/10 glass-card">
+                    <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-warning mx-auto mb-1.5 sm:mb-2" />
+                    <p className="text-lg sm:text-2xl font-bold text-foreground">{pendingTasks}</p>
+                    <p className="text-[10px] sm:text-sm text-muted-foreground">Pending</p>
                   </div>
-                ))}
-                {myTasks.length === 0 && (
-                  <p className="text-center text-muted-foreground py-4 text-sm">No tasks assigned</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                  <div className="text-center p-3 sm:p-4 rounded-xl bg-info/10 glass-card">
+                    <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-info mx-auto mb-1.5 sm:mb-2" />
+                    <p className="text-lg sm:text-2xl font-bold text-foreground">{inProgressTasks}</p>
+                    <p className="text-[10px] sm:text-sm text-muted-foreground">In Progress</p>
+                  </div>
+                  <div className="text-center p-3 sm:p-4 rounded-xl bg-success/10 glass-card">
+                    <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-success mx-auto mb-1.5 sm:mb-2" />
+                    <p className="text-lg sm:text-2xl font-bold text-foreground">{completedTasks}</p>
+                    <p className="text-[10px] sm:text-sm text-muted-foreground">Completed</p>
+                  </div>
+                </div>
+
+                {/* Recent Tasks */}
+                <div className="space-y-2 sm:space-y-3">
+                  {myTasks.slice(0, 3).map((task) => (
+                    <div
+                      key={task.id}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 sm:p-3 rounded-lg bg-muted/30 glass-card gap-2"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground text-sm truncate">{task.title}</p>
+                        <p className="text-xs text-muted-foreground">Due: {task.dueDate}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                        <Badge className={cn('text-[10px] sm:text-xs', getPriorityColor(task.priority))}>
+                          {task.priority}
+                        </Badge>
+                        <Badge className={cn('text-[10px] sm:text-xs', getStatusColor(task.status))}>
+                          {task.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                  {myTasks.length === 0 && (
+                    <p className="text-center text-muted-foreground py-4 text-sm">No tasks assigned</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Today's Attendance */}
           <Card className="glass-card card-hover">
