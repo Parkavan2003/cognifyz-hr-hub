@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
-import { useSearch } from '@/contexts/SearchContext';
 import { Bell, Search, User, LayoutDashboard, Users, ListTodo, Calendar, DollarSign, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { getRoleColor } from '@/data/employees';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 interface TopbarProps {
   title: string;
@@ -97,6 +97,9 @@ export function Topbar({ title }: TopbarProps) {
             </div>
           )}
         </div>
+
+        {/* Theme Toggle */}
+        <ThemeToggle />
 
         {/* Notifications */}
         <button className="relative p-2 rounded-lg hover:bg-muted transition-colors">
