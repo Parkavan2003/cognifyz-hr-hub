@@ -119,7 +119,7 @@ export default function Dashboard() {
             const Icon = stat.icon;
             return (
               <Link key={stat.label} to={stat.link}>
-                <div className={cn('stat-card', stat.cardBg)}>
+                <div className="stat-card">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
                     <div className={cn('p-2.5 sm:p-3 rounded-xl w-fit', stat.bg)}>
                       <Icon className={cn('w-5 h-5 sm:w-6 sm:h-6', stat.color)} />
