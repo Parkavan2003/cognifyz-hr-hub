@@ -16,6 +16,7 @@ interface DashboardChartsProps {
   };
   teamSize: number;
   isManager: boolean;
+  isFounder?: boolean;
 }
 
 const chartConfig = {
@@ -26,7 +27,7 @@ const chartConfig = {
   absent: { label: 'Absent', color: 'hsl(var(--destructive))' },
 };
 
-export function DashboardCharts({ taskData, attendanceData, teamSize, isManager }: DashboardChartsProps) {
+export function DashboardCharts({ taskData, attendanceData, teamSize, isManager, isFounder = false }: DashboardChartsProps) {
   const taskChartData = [
     { name: 'Pending', value: taskData.pending, fill: 'hsl(var(--warning))' },
     { name: 'In Progress', value: taskData.inProgress, fill: 'hsl(var(--info))' },
@@ -60,45 +61,47 @@ export function DashboardCharts({ taskData, attendanceData, teamSize, isManager 
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-      {/* Task Distribution Pie Chart */}
-      <Card className="glass-card card-hover">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-            <PieChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-            Task Distribution
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={chartConfig} className="h-[180px] sm:h-[200px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={taskChartData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={40}
-                  outerRadius={70}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {taskChartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                  ))}
-                </Pie>
-                <ChartTooltip content={<ChartTooltipContent />} />
-              </PieChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-          <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-3">
-            {taskChartData.map((item) => (
-              <div key={item.name} className="flex items-center gap-1.5 sm:gap-2">
-                <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full" style={{ backgroundColor: item.fill }} />
-                <span className="text-xs sm:text-sm text-muted-foreground">{item.name}: {item.value}</span>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Task Distribution Pie Chart - Hidden for Founder */}
+      {!isFounder && (
+        <Card className="glass-card card-hover">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <PieChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              Task Distribution
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer config={chartConfig} className="h-[180px] sm:h-[200px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={taskChartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={40}
+                    outerRadius={70}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {taskChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Pie>
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-3">
+              {taskChartData.map((item) => (
+                <div key={item.name} className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full" style={{ backgroundColor: item.fill }} />
+                  <span className="text-xs sm:text-sm text-muted-foreground">{item.name}: {item.value}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Weekly Performance Line Chart */}
       <Card className="glass-card card-hover">
