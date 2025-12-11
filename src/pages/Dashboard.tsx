@@ -52,6 +52,7 @@ export default function Dashboard() {
       icon: ListTodo,
       color: 'text-primary',
       bg: 'bg-primary/10',
+      cardBg: 'bg-gradient-to-br from-primary/10 to-primary/5',
       link: '/tasks',
     },
     {
@@ -60,6 +61,7 @@ export default function Dashboard() {
       icon: Users,
       color: 'text-chart-2',
       bg: 'bg-chart-2/10',
+      cardBg: 'bg-gradient-to-br from-chart-2/10 to-chart-2/5',
       link: '/employees',
     },
     {
@@ -68,6 +70,7 @@ export default function Dashboard() {
       icon: Calendar,
       color: 'text-chart-3',
       bg: 'bg-chart-3/10',
+      cardBg: 'bg-gradient-to-br from-chart-3/10 to-chart-3/5',
       link: '/attendance',
     },
     {
@@ -75,8 +78,9 @@ export default function Dashboard() {
       value: unreadMessages,
       subLabel: 'unread',
       icon: MessageSquare,
-      color: 'text-chart-5',
-      bg: 'bg-chart-5/10',
+      color: 'text-chart-4',
+      bg: 'bg-chart-4/10',
+      cardBg: 'bg-gradient-to-br from-chart-4/10 to-chart-4/5',
       link: '/messages',
     },
   ];
@@ -115,7 +119,7 @@ export default function Dashboard() {
             const Icon = stat.icon;
             return (
               <Link key={stat.label} to={stat.link}>
-                <div className="stat-card">
+                <div className={cn('stat-card', stat.cardBg)}>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
                     <div className={cn('p-2.5 sm:p-3 rounded-xl w-fit', stat.bg)}>
                       <Icon className={cn('w-5 h-5 sm:w-6 sm:h-6', stat.color)} />
