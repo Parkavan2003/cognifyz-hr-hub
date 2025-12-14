@@ -25,9 +25,13 @@ interface DataContextType {
   
   // Attendance operations
   markAttendance: (status: AttendanceStatus) => void;
+  checkIn: () => void;
+  checkOut: () => void;
+  updateAttendance: (employeeId: string, date: string, status: AttendanceStatus) => void;
   getMyAttendance: () => AttendanceRecord[];
   getAttendanceByEmployee: (employeeId: string) => AttendanceRecord[];
   getTodayAttendance: () => AttendanceRecord | undefined;
+  getTodayAttendanceByEmployee: (employeeId: string) => AttendanceRecord | undefined;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -154,6 +158,79 @@ export function DataProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('cognifyz_attendance', JSON.stringify(updated));
   };
 
+  const checkIn = () => {
+    if (!user) return;
+    
+    const today = new Date().toISOString().split('T')[0];
+    const currentTime = new Date().toTimeString().slice(0, 5);
+    const existingIndex = attendance.findIndex(
+      a => a.employeeId === user.id && a.date === today
+    );
+
+    const record: AttendanceRecord = {
+      id: `att-${user.id}-${today}`,
+      employeeId: user.id,
+      date: today,
+      status: "Present",
+      checkIn: currentTime,
+      checkOut: undefined,
+    };
+
+    let updated: AttendanceRecord[];
+    if (existingIndex >= 0) {
+      updated = attendance.map((a, i) => i === existingIndex ? { ...a, checkIn: currentTime, status: "Present" as AttendanceStatus } : a);
+    } else {
+      updated = [...attendance, record];
+    }
+
+    setAttendance(updated);
+    localStorage.setItem('cognifyz_attendance', JSON.stringify(updated));
+  };
+
+  const checkOut = () => {
+    if (!user) return;
+    
+    const today = new Date().toISOString().split('T')[0];
+    const currentTime = new Date().toTimeString().slice(0, 5);
+    
+    const updated = attendance.map(a => 
+      a.employeeId === user.id && a.date === today 
+        ? { ...a, checkOut: currentTime } 
+        : a
+    );
+
+    setAttendance(updated);
+    localStorage.setItem('cognifyz_attendance', JSON.stringify(updated));
+  };
+
+  const updateAttendance = (employeeId: string, date: string, status: AttendanceStatus) => {
+    const existingIndex = attendance.findIndex(
+      a => a.employeeId === employeeId && a.date === date
+    );
+
+    if (existingIndex >= 0) {
+      const updated = attendance.map((a, i) => 
+        i === existingIndex 
+          ? { ...a, status, checkIn: status === "Present" || status === "Half Day" ? a.checkIn || "09:00" : undefined, checkOut: status === "Present" ? a.checkOut || "18:00" : status === "Half Day" ? "13:00" : undefined } 
+          : a
+      );
+      setAttendance(updated);
+      localStorage.setItem('cognifyz_attendance', JSON.stringify(updated));
+    } else {
+      const record: AttendanceRecord = {
+        id: `att-${employeeId}-${date}`,
+        employeeId,
+        date,
+        status,
+        checkIn: status === "Present" || status === "Half Day" ? "09:00" : undefined,
+        checkOut: status === "Present" ? "18:00" : status === "Half Day" ? "13:00" : undefined,
+      };
+      const updated = [...attendance, record];
+      setAttendance(updated);
+      localStorage.setItem('cognifyz_attendance', JSON.stringify(updated));
+    }
+  };
+
   const getMyAttendance = () => {
     if (!user) return [];
     return attendance.filter(a => a.employeeId === user.id);
@@ -167,6 +244,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (!user) return undefined;
     const today = new Date().toISOString().split('T')[0];
     return attendance.find(a => a.employeeId === user.id && a.date === today);
+  };
+
+  const getTodayAttendanceByEmployee = (employeeId: string) => {
+    const today = new Date().toISOString().split('T')[0];
+    return attendance.find(a => a.employeeId === employeeId && a.date === today);
   };
 
   return (
@@ -185,9 +267,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
       getSentMessages,
       getUnreadCount,
       markAttendance,
+      checkIn,
+      checkOut,
+      updateAttendance,
       getMyAttendance,
       getAttendanceByEmployee,
       getTodayAttendance,
+      getTodayAttendanceByEmployee,
     }}>
       {children}
     </DataContext.Provider>
