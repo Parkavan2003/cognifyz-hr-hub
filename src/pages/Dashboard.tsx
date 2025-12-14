@@ -46,6 +46,15 @@ export default function Dashboard() {
   const isFounder = user.role === 'Founder / Director';
   const teamSize = visibleEmployees.length - 1;
 
+  // Get reporting manager name
+  const getReportingManagerName = () => {
+    if (!user.employee.reportingManagerId) return null;
+    const manager = visibleEmployees.find(emp => emp.id === user.employee.reportingManagerId) ||
+      getVisibleEmployees().find(emp => emp.id === user.employee.reportingManagerId);
+    return manager?.name || null;
+  };
+  const reportingManagerName = getReportingManagerName();
+
   const stats = [
     {
       label: 'My Tasks',
@@ -184,6 +193,12 @@ export default function Dashboard() {
                     {new Date(user.employee.joinDate).toLocaleDateString()}
                   </span>
                 </div>
+                {reportingManagerName && (
+                  <div className="flex justify-between text-xs sm:text-sm">
+                    <span className="text-muted-foreground">Reporting Manager</span>
+                    <span className="font-medium text-foreground">{reportingManagerName}</span>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
