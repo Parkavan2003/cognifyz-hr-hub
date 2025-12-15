@@ -45,7 +45,7 @@ export default function Login() {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    const success = login(selectedEmployee.name, selectedEmployee.role as Role);
+    const success = login(selectedEmployee.id);
     
     if (success) {
       toast.success('Welcome to Cognifyz!');

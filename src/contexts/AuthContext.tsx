@@ -11,7 +11,7 @@ interface AuthUser {
 interface AuthContextType {
   user: AuthUser | null;
   employees: Employee[];
-  login: (name: string, role: Role) => boolean;
+  login: (employeeId: string) => boolean;
   logout: () => void;
   canSee: (targetRole: Role) => boolean;
   canAssign: () => boolean;
@@ -53,14 +53,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = (name: string, role: Role): boolean => {
-    // Find or create employee with matching name and role
-    let employee = employees.find(e => e.name.toLowerCase() === name.toLowerCase() && e.role === role);
-    
-    if (!employee) {
-      // Find any employee with matching role
-      employee = employees.find(e => e.role === role);
-    }
+  const login = (employeeId: string): boolean => {
+    // Find employee by ID - this ensures exact match
+    const employee = employees.find(e => e.id === employeeId);
 
     if (!employee) {
       return false;
