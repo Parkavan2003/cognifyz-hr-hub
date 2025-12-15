@@ -1,34 +1,42 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { ROLES, Role } from '@/data/employees';
+import { initialEmployees, Role } from '@/data/employees';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { toast } from 'sonner';
 import cognifyzLogo from '@/assets/cognifyz-logo.png';
 import loginIllustration from '@/assets/login-illustration.jpg';
-import { Building2, LogIn } from 'lucide-react';
+import { Building2, LogIn, ChevronsUpDown, Check, User } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function Login() {
-  const [name, setName] = useState('');
-  const [role, setRole] = useState<Role | ''>('');
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
+  const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const selectedEmployee = initialEmployees.find(emp => emp.id === selectedEmployeeId);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name.trim() || !role) {
-      toast.error('Please enter your name and select a role');
+    if (!selectedEmployee) {
+      toast.error('Please select an employee');
       return;
     }
 
@@ -37,7 +45,7 @@ export default function Login() {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    const success = login(name.trim(), role as Role);
+    const success = login(selectedEmployee.name, selectedEmployee.role as Role);
     
     if (success) {
       toast.success('Welcome to Cognifyz!');
@@ -81,44 +89,82 @@ export default function Login() {
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-foreground font-medium">
-                Full Name
+              <Label htmlFor="employee" className="text-foreground font-medium">
+                Select Employee
               </Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="Enter your full name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="h-12 bg-muted/50 border-border/50 focus:border-primary/50 focus:bg-card transition-colors"
-              />
+              <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="w-full h-12 justify-between bg-muted/50 border-border/50 hover:bg-card hover:border-primary/50 transition-colors"
+                  >
+                    {selectedEmployee ? (
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4 text-muted-foreground" />
+                        <span>{selectedEmployee.name}</span>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">Choose an employee...</span>
+                    )}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-card border-border z-50" align="start">
+                  <Command className="bg-card">
+                    <CommandInput placeholder="Search employee..." className="h-10" />
+                    <CommandList>
+                      <CommandEmpty>No employee found.</CommandEmpty>
+                      <CommandGroup>
+                        {initialEmployees.map((employee) => (
+                          <CommandItem
+                            key={employee.id}
+                            value={employee.name}
+                            onSelect={() => {
+                              setSelectedEmployeeId(employee.id);
+                              setOpen(false);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedEmployeeId === employee.id ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            <div className="flex flex-col">
+                              <span className="font-medium">{employee.name}</span>
+                              <span className="text-xs text-muted-foreground">{employee.role} • {employee.department}</span>
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
+            {/* Auto-selected Role Display */}
             <div className="space-y-2">
-              <Label htmlFor="role" className="text-foreground font-medium">
-                Select Your Role
+              <Label className="text-foreground font-medium">
+                Role
               </Label>
-              <Select value={role} onValueChange={(value) => setRole(value as Role)}>
-                <SelectTrigger className="h-12 bg-muted/50 border-border/50 focus:border-primary/50 focus:bg-card transition-colors">
-                  <SelectValue placeholder="Choose your role" />
-                </SelectTrigger>
-                <SelectContent className="bg-card border-border">
-                  {ROLES.map((r) => (
-                    <SelectItem key={r} value={r} className="focus:bg-muted">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="w-4 h-4 text-muted-foreground" />
-                        {r}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="h-12 px-3 flex items-center gap-2 rounded-md bg-muted/30 border border-border/50">
+                <Building2 className="w-4 h-4 text-muted-foreground" />
+                {selectedEmployee ? (
+                  <span className="text-foreground">{selectedEmployee.role}</span>
+                ) : (
+                  <span className="text-muted-foreground">Role will be auto-selected</span>
+                )}
+              </div>
             </div>
 
             <Button
               type="submit"
               className="w-full h-12 font-semibold bg-gradient-to-r from-primary to-chart-5 hover:from-primary/90 hover:to-chart-5/90 transition-all shadow-lg shadow-primary/25"
-              disabled={isLoading}
+              disabled={isLoading || !selectedEmployee}
             >
               {isLoading ? (
                 <span className="flex items-center gap-2">
@@ -137,7 +183,7 @@ export default function Login() {
           {/* Footer Note */}
           <div className="pt-6 border-t border-border/50">
             <p className="text-sm text-center text-muted-foreground">
-              Select any role to explore the system with role-based permissions
+              Select any employee to explore the system with role-based permissions
             </p>
           </div>
 
